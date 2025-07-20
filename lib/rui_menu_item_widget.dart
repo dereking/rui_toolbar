@@ -28,7 +28,7 @@ class RuiMenuItemWidget extends StatelessWidget {
           item.checked != null
               ? Checkbox(value: item.checked, onChanged: (checked) {})
               : Container(width: menuIconSize),
-          Icon(item.icon),
+          Icon(item.icon, size: menuIconSize),
           Container(width: gutSize),
           Text(item.title),
           if (item.hasSubItems) const Spacer(),

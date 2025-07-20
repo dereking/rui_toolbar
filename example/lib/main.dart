@@ -102,9 +102,35 @@ class _MyHomePageState extends State<MyHomePage> {
         RuiMenuItem(
           id: '2',
           icon: Icons.settings,
-          title: 'Settings',
+          title: 'All Settings',
           subItems: [
-            RuiMenuItem(id: '2-1', icon: Icons.settings, title: 'Sound'),
+            RuiMenuItem(
+              id: '2-1',
+              icon: Icons.settings,
+              title: 'Sound of Setting',
+              subItems: [
+                RuiMenuItem(
+                  id: '2-1-1',
+                  icon: Icons.settings,
+                  title: 'Sound-1',
+                ),
+                RuiMenuItem(
+                  id: '2-1-2',
+                  icon: Icons.settings,
+                  title: 'Sound-2',
+                ),
+                RuiMenuItem(
+                  id: '2-1-3',
+                  icon: Icons.settings,
+                  title: 'Sound-3',
+                ),
+                RuiMenuItem(
+                  id: '2-1-4',
+                  icon: Icons.settings,
+                  title: 'Sound-4',
+                ),
+              ],
+            ),
             RuiMenuItem(id: '2-2', icon: Icons.settings, title: 'Movie'),
           ],
         ),
@@ -197,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
         RuiMenuItem(
           id: '2',
           icon: Icons.settings,
-          title: 'Settings',
+          title: 'All Media Settings',
           subItems: [
             RuiMenuItem(id: '2-1', icon: Icons.settings, title: 'Sound'),
             RuiMenuItem(id: '2-2', icon: Icons.settings, title: 'Movie'),

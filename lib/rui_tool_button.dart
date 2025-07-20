@@ -15,8 +15,8 @@ class RuiToolButton extends StatefulWidget {
 
   final double iconSize;
 
-  final double? width;
-  final double? height;
+  // final double? width;
+  // final double? height;
 
   final TriggerMode triggerMode;
   final MenuButtonStyle buttonStyle;
@@ -32,8 +32,8 @@ class RuiToolButton extends StatefulWidget {
   RuiToolButton({
     required this.item,
     required this.iconSize,
-    this.width = itemMinWidth,
-    this.height = itemMinHeight,
+    // this.width = itemMinWidth,
+    // this.height = itemMinHeight,
     required this.triggerMode,
     required this.buttonStyle,
     required this.toolbarVertical,
@@ -44,6 +44,9 @@ class RuiToolButton extends StatefulWidget {
 }
 
 class _RuiToolButtonState extends State<RuiToolButton> {
+  double _width = 0;
+  double _height = 0;
+
   bool _disposed = false;
 
   final FocusNode _focusNode = FocusNode();
@@ -65,6 +68,20 @@ class _RuiToolButtonState extends State<RuiToolButton> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // _width = widget.width ?? RuiToolButton.itemMinWidth;
+    // _height = widget.height ?? RuiToolButton.itemMinHeight;
+  }
+
+  @override
+  void didUpdateWidget(RuiToolButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // _width = widget.width ?? RuiToolButton.itemMinWidth;
+    // _height = widget.height ?? RuiToolButton.itemMinHeight;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: _onTap,
@@ -74,11 +91,13 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         }
       },
       child: Row(
+        mainAxisAlignment: getMainAxisAlignment(),
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildButton(),
           if (widget.item.hasSubItems &&
               widget.buttonStyle != MenuButtonStyle.iconOnly)
-            if (widget.toolbarVertical) Flexible(child: Container()),
+            if (widget.toolbarVertical) Container(),
           if (widget.item.hasSubItems &&
               widget.buttonStyle != MenuButtonStyle.iconOnly)
             __buildDropdownArrow(() {
@@ -89,48 +108,30 @@ class _RuiToolButtonState extends State<RuiToolButton> {
     );
   }
 
-  Size getSize() {
+  MainAxisAlignment getMainAxisAlignment() {
+    if (widget.toolbarVertical) {
+      switch (widget.buttonStyle) {
+        case MenuButtonStyle.iconOnly:
+          return MainAxisAlignment.center;
+        case MenuButtonStyle.textFollowIcon:
+          return MainAxisAlignment.start;
+        case MenuButtonStyle.textOnly:
+          return MainAxisAlignment.start;
+        case MenuButtonStyle.textUnderIcon:
+          return MainAxisAlignment.center;
+      }
+    }
+
     switch (widget.buttonStyle) {
       case MenuButtonStyle.iconOnly:
-        return Size(
-          widget.iconSize + 2 * RuiToolButton.padding,
-          max(
-            RuiToolButton.itemMinHeight,
-            widget.iconSize + 2 * RuiToolButton.padding,
-          ),
-        );
+        return MainAxisAlignment.center;
       case MenuButtonStyle.textFollowIcon:
-        return Size(
-          max(
-            RuiToolButton.itemMinWidth,
-            widget.iconSize + 2 * RuiToolButton.padding,
-          ),
-          max(
-            RuiToolButton.itemMinHeight,
-            widget.iconSize + 2 * RuiToolButton.padding,
-          ),
-        );
+        return MainAxisAlignment.start;
       case MenuButtonStyle.textOnly:
-        return Size(
-          max(RuiToolButton.itemMinWidth, 2 * RuiToolButton.padding),
-          max(
-            RuiToolButton.itemMinHeight,
-            widget.iconSize + 2 * RuiToolButton.padding,
-          ),
-        );
+        return MainAxisAlignment.start;
       case MenuButtonStyle.textUnderIcon:
-        return Size(
-          max(RuiToolButton.itemMinWidth, 2 * RuiToolButton.padding),
-          max(
-            RuiToolButton.itemMinHeight,
-            widget.iconSize +
-                2 * RuiToolButton.padding +
-                RuiToolButton.spacer +
-                RuiToolButton.textHeight,
-          ),
-        );
+        return MainAxisAlignment.center;
     }
-    // return
   }
 
   Widget _buildButton() {
@@ -154,6 +155,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Icon(widget.item.icon, size: widget.iconSize),
+          // SizedBox(width: widget.iconSize),
           // const SizedBox(width: RuiToolButton.spacer),
           Text(widget.item.title),
         ],
@@ -173,7 +175,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
       onTap: onTap,
       child: SizedBox(
         width: 16,
-        height: (widget.height ?? 16) * 2,
+        // height: (widget.height ?? 16) * 2,
         child: const Icon(Icons.arrow_drop_down, size: 16),
       ),
     );
@@ -245,12 +247,13 @@ class _RuiToolButtonState extends State<RuiToolButton> {
 
     if (menuItems.isEmpty) return;
 
-    //
+    // get render box of toolbar button.
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
 
     // print("${overlay.size},${overlay.constraints}");
 
+    //calc menu position.
     final Offset menuPosition = menu.position - const Offset(0, -1);
 
     print(menuPosition);
@@ -258,10 +261,11 @@ class _RuiToolButtonState extends State<RuiToolButton> {
     print(menu.size);
     final Size menuSize = menu.size;
     final bool rootMenu = menu.parent == null;
-    // final Offset positionOffset = rootMenu
-    //     ? Offset(5, widget.height ?? RuiToolButton.defaultItemSize)
-    //     : Offset(menuSize.width - 10, 10);
-    final Offset positionOffset = rootMenu ? Offset(0, 0) : Offset(0, 10);
+    final Offset positionOffset = rootMenu
+        // ? Offset(5, widget.height ?? menuSize.height)
+        ? Offset(5, menuSize.height)
+        : Offset(menuSize.width - 10, 10);
+    // final Offset positionOffset = rootMenu ? Offset(0, 0) : Offset(0, 10);
 
     Offset position = menuPosition + positionOffset;
     double? top = position.dy;
@@ -336,7 +340,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
             child: RuiMenuItemWidget(
               item: item,
               iconScale: 1,
-              menuIconSize: 32,
+              menuIconSize: widget.iconSize,
             ),
           );
 
@@ -421,5 +425,17 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         _popups.clear();
       }
     });
+  }
+}
+
+class ClipperRect extends CustomClipper<Rect> {
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, 0, size.width, size.height);
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Rect> oldClipper) {
+    return true;
   }
 }

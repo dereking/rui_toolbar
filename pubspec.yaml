@@ -1,7 +1,7 @@
 name: rui_toolbar
-description: "A new Flutter package project."
+description: "A new Flutter toolbar widget, support vertical and horizontal."
 version: 0.0.1
-homepage:
+homepage: https://github.com/dereking/rui_toolbar
 
 environment:
   sdk: ^3.8.1
@@ -21,6 +21,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - images/image.png
+
 
   # To add assets to your package, add an assets section, like this:
   # assets:
