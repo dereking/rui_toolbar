@@ -7,8 +7,7 @@ import 'enum.dart';
 import 'rui_menu_item.dart';
 import 'rui_tool_button.dart';
 
-class RuiToolbar extends StatefulWidget {
-  // final String id;
+class RuiToolbar extends StatefulWidget { 
   final List<RuiMenuItem> items;
   // final double? height;
   // final double? width;
@@ -25,7 +24,7 @@ class RuiToolbar extends StatefulWidget {
 
   static const padding = EdgeInsets.symmetric(horizontal: 12, vertical: 8);
 
-  const RuiToolbar({
+    RuiToolbar({
     super.key,
     // required this.id,
     required this.items,
@@ -37,10 +36,11 @@ class RuiToolbar extends StatefulWidget {
     this.buttonStyle = MenuButtonStyle.textFollowIcon,
     this.enableSelectedTopMenu = false,
     this.initialSelectedTopMenuIndex = 0,
-  });
+  }) ;
 
   @override
   State<RuiToolbar> createState() => _RuiToolbarState();
+ 
 }
 
 class _RuiToolbarState extends State<RuiToolbar> {

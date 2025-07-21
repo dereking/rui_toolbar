@@ -32,8 +32,8 @@ class RuiMenuItem {
     this.subItems,
     this.active = false,
     this.checked ,
-  // }) : _key = GlobalObjectKey(id);
-  }) : _key = GlobalKey();
+  }) : _key = GlobalObjectKey(id);
+  // }) : _key = GlobalKey();
 
 
   GlobalKey get key => _key;

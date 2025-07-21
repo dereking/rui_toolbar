@@ -417,15 +417,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
           right: right,
           bottom: bottom,
           child: Material(
-            child: Focus(
-              focusNode: _focusNode,
-              onFocusChange: (hasFocus) {
-                // if (!hasFocus) {
-                //   // _removeOverlay();
-                //   _removeHoveredPopupKey(menu);
-                // }
-              },
-              child: ConstrainedBox(
+            child:   ConstrainedBox(
                 constraints: BoxConstraints(
                   minWidth: RuiToolButton.menuItemMinWidth,
                   maxHeight: overlay.size.height - (top ?? 0),
@@ -455,7 +447,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
                 ),
               ),
             ),
-          ),
+          
         );
       },
     );

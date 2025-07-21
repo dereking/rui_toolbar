@@ -35,14 +35,20 @@ class RuiMenuItemWidget extends StatelessWidget {
     return SizedBox(
       width: max(
         minWidth,
-        2 * menuIconSize + item.title.length * 9 + gutSize + (item.hasSubItems ? 32 : 0),
+        2 * menuIconSize +
+            item.title.length * 8 +
+            gutSize +
+            (item.hasSubItems ? 32 : 0),
       ),
       child: Row(
         // mainAxisSize: MainAxisSize.min,
         children: [
-          item.checked != null
-              ? Checkbox(value: item.checked, onChanged: (checked) {})
-              : Container(width: menuIconSize),
+          SizedBox(
+            width: 16,
+            child: Text(
+              (item.checked != null && item.checked!) ? "✓" : " ",
+            ),
+          ),
           Icon(item.icon, size: menuIconSize),
           Container(width: gutSize),
           Text(item.title),
