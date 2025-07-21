@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class RuiToolButton extends StatefulWidget {
 
   final double iconSize;
 
-  // final double? width;
+  final double? width;
   // final double? height;
 
   final TriggerMode triggerMode;
@@ -25,14 +26,18 @@ class RuiToolButton extends StatefulWidget {
   static const double spacer = 5.0;
   static const double textHeight = 24.0;
 
-  static const double itemMinWidth = 150.0;
-  static const double itemMinHeight = 24.0;
+  static const double defaultButtonWidth = 150.0;
+  // static const double itemMinWidth = 150.0;
+  // static const double itemMinHeight = 24.0;
   // static const double defaultItemSize = 42.0;
+
+  static const double menuItemIconSize = 16.0;
+  static const double menuItemMinWidth = 120.0;
 
   RuiToolButton({
     required this.item,
     required this.iconSize,
-    // this.width = itemMinWidth,
+    this.width = defaultButtonWidth,
     // this.height = itemMinHeight,
     required this.triggerMode,
     required this.buttonStyle,
@@ -44,9 +49,6 @@ class RuiToolButton extends StatefulWidget {
 }
 
 class _RuiToolButtonState extends State<RuiToolButton> {
-  double _width = 0;
-  double _height = 0;
-
   bool _disposed = false;
 
   final FocusNode _focusNode = FocusNode();
@@ -90,14 +92,41 @@ class _RuiToolButtonState extends State<RuiToolButton> {
           showSubMenu(widget.item);
         }
       },
-      child: Row(
-        mainAxisAlignment: getMainAxisAlignment(),
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Tooltip(
+        message: widget.item.tooltip ?? widget.item.title,
+        child:
+            widget.toolbarVertical
+                ? _buildButtonInVertical()
+                : _buildButtonNormal(),
+      ),
+    );
+  }
+
+  Widget _buildButtonNormal() {
+    return Row(
+      mainAxisAlignment: getMainAxisAlignment(),
+      // crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildButtonContent(false),
+        if (widget.item.hasSubItems &&
+            widget.buttonStyle != MenuButtonStyle.iconOnly)
+          if (widget.toolbarVertical) Container(),
+        if (widget.item.hasSubItems &&
+            widget.buttonStyle != MenuButtonStyle.iconOnly)
+          __buildDropdownArrow(() {
+            showSubMenu(widget.item);
+          }),
+      ],
+    );
+  }
+
+  Widget _buildButtonInVertical() {
+    return SizedBox(
+      width: widget.width,
+      child: Stack(
+        alignment: AlignmentDirectional.center,
         children: [
-          _buildButton(),
-          if (widget.item.hasSubItems &&
-              widget.buttonStyle != MenuButtonStyle.iconOnly)
-            if (widget.toolbarVertical) Container(),
+          _buildButtonContent(true),
           if (widget.item.hasSubItems &&
               widget.buttonStyle != MenuButtonStyle.iconOnly)
             __buildDropdownArrow(() {
@@ -105,6 +134,21 @@ class _RuiToolButtonState extends State<RuiToolButton> {
             }),
         ],
       ),
+      // child: Row(
+      //   mainAxisAlignment: getMainAxisAlignment(),
+      //   crossAxisAlignment: CrossAxisAlignment.center,
+      //   children: [
+      //     _buildButtonContent(true),
+      //     if (widget.item.hasSubItems &&
+      //         widget.buttonStyle != MenuButtonStyle.iconOnly)
+      //       if (widget.toolbarVertical) Spacer(),
+      //     if (widget.item.hasSubItems &&
+      //         widget.buttonStyle != MenuButtonStyle.iconOnly)
+      //       __buildDropdownArrow(() {
+      //         showSubMenu(widget.item);
+      //       }),
+      //   ],
+      // ),
     );
   }
 
@@ -114,8 +158,6 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         case MenuButtonStyle.iconOnly:
           return MainAxisAlignment.center;
         case MenuButtonStyle.textFollowIcon:
-          return MainAxisAlignment.start;
-        case MenuButtonStyle.textOnly:
           return MainAxisAlignment.start;
         case MenuButtonStyle.textUnderIcon:
           return MainAxisAlignment.center;
@@ -127,40 +169,20 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         return MainAxisAlignment.center;
       case MenuButtonStyle.textFollowIcon:
         return MainAxisAlignment.start;
-      case MenuButtonStyle.textOnly:
-        return MainAxisAlignment.start;
       case MenuButtonStyle.textUnderIcon:
         return MainAxisAlignment.center;
     }
   }
 
-  Widget _buildButton() {
+  Widget _buildButtonContent(bool flexWidth) {
     switch (widget.buttonStyle) {
       case MenuButtonStyle.iconOnly:
         return _buildIconButton();
       case MenuButtonStyle.textFollowIcon:
-        return _buildTextFollowIconButton();
+        return _buildTextFollowIconButton(flexWidth);
       case MenuButtonStyle.textUnderIcon:
-        return _buildTextUnderIconButton();
-      case MenuButtonStyle.textOnly:
-        return _buildTextButton();
+        return _buildTextUnderIconButton(flexWidth);
     }
-  }
-
-  Widget _buildTextButton() {
-    return Padding(
-      padding: const EdgeInsets.all(RuiToolButton.padding),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Icon(widget.item.icon, size: widget.iconSize),
-          // SizedBox(width: widget.iconSize),
-          // const SizedBox(width: RuiToolButton.spacer),
-          Text(widget.item.title),
-        ],
-      ),
-    );
   }
 
   Widget _buildIconButton() {
@@ -171,30 +193,45 @@ class _RuiToolButtonState extends State<RuiToolButton> {
   }
 
   Widget __buildDropdownArrow(void Function()? onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        width: 16,
-        // height: (widget.height ?? 16) * 2,
-        child: const Icon(Icons.arrow_drop_down, size: 16),
+    return Align(
+      alignment: Alignment.centerRight, // 可选：设置垂直位置
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: 16,
+          // height: (widget.height ?? 16) * 2,
+          child: const Icon(Icons.arrow_drop_down, size: 16),
+        ),
       ),
     );
   }
 
-  Widget _buildTextFollowIconButton() {
+  Widget _buildTextFollowIconButton(bool flexWidth) {
     return Padding(
       padding: const EdgeInsets.all(RuiToolButton.padding),
       child: Row(
         children: [
           Icon(widget.item.icon, size: widget.iconSize),
           const SizedBox(width: RuiToolButton.spacer),
-          Text(widget.item.title),
+          SizedBox(
+            width:
+                widget.width != null
+                    ? (widget.width! -
+                        RuiToolButton.spacer -
+                        2 * RuiToolButton.padding -
+                        widget.iconSize)
+                    : null,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(widget.item.title),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTextUnderIconButton() {
+  Widget _buildTextUnderIconButton(bool flexWidth) {
     return Padding(
       padding: const EdgeInsets.all(RuiToolButton.padding),
       child: Column(
@@ -202,7 +239,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         children: [
           Icon(widget.item.icon, size: widget.iconSize),
           const SizedBox(height: RuiToolButton.spacer),
-          Text(widget.item.title),
+          FittedBox(child: Text(widget.item.title)),
         ],
       ),
     );
@@ -247,66 +284,83 @@ class _RuiToolButtonState extends State<RuiToolButton> {
 
     if (menuItems.isEmpty) return;
 
-    // get render box of toolbar button.
+    // 获取覆盖层的RenderBox对象,用于计算菜单位置
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
 
-    // print("${overlay.size},${overlay.constraints}");
-
-    //calc menu position.
+    // 计算菜单的初始位置
+    // 对menu.position进行微调,向上偏移1个单位
     final Offset menuPosition = menu.position - const Offset(0, -1);
 
-    print(menuPosition);
+    // print(menuPosition);
 
-    print(menu.size);
+    // print(menu.size);
+    // 获取菜单项的尺寸
     final Size menuSize = menu.size;
+    // 判断是否为根菜单(顶层菜单)
     final bool rootMenu = menu.parent == null;
-    final Offset positionOffset = rootMenu
-        // ? Offset(5, widget.height ?? menuSize.height)
-        ? Offset(5, menuSize.height)
-        : Offset(menuSize.width - 10, 10);
-    // final Offset positionOffset = rootMenu ? Offset(0, 0) : Offset(0, 10);
+    // 计算位置偏移量
+    // 根菜单: 向右偏移5,向下偏移菜单高度
+    // 子菜单:
+    final Offset positionOffset =
+        rootMenu
+            ? Offset(5, menuSize.height)
+            : Offset(menuSize.width *2/3 , menuSize.height *2/ 3);
+    // print(" cal offset rootMenu=$rootMenu, positionOffset=$positionOffset");
 
+    // 计算最终的菜单显示位置
     Offset position = menuPosition + positionOffset;
     double? top = position.dy;
     double? left = position.dx;
     double? right;
     double? bottom;
 
-    print(position);
+    // print("menuPosition position= $position, overlay.size=${overlay.size}");
 
-    if (position.dx + RuiToolButton.itemMinWidth > overlay.size.width) {
+    // 处理水平方向溢出
+    // 如果菜单右边界超出屏幕
+    if (position.dx + RuiToolButton.defaultButtonWidth > overlay.size.width) {
       if (rootMenu) {
+        // 根菜单靠右对齐
         left = null;
         right = 0;
       } else {
+        // 子菜单向左展开
         left = null;
         right = overlay.size.width - menuPosition.dx;
+        // 如果左边也放不下,则向下展开
         if (right + menuSize.width >= overlay.size.width) {
           top = menuPosition.dy + 30;
           bottom = null;
+          // 如果靠左边距离太小,则稍微右移
           left = menuPosition.dx <= 15 ? menuPosition.dx + 10 : 0;
           right = null;
         }
       }
     }
 
-    if (position.dy + RuiToolButton.itemMinHeight * menuItems.length >
-        overlay.size.height) {
+    // 处理垂直方向溢出
+    // 如果菜单底部超出屏幕
+    if (position.dy + 24 * menuItems.length > overlay.size.height) {
       if (rootMenu) {
+        // 根菜单靠底对齐
         top = null;
         bottom = 0;
       } else {
+        // 子菜单向上展开
         top = null;
         bottom = overlay.size.height - menuPosition.dy;
+        // 如果上面也放不下,则调整到合适位置
         if (bottom + menuSize.height >= overlay.size.height) {
           top = menuPosition.dy + 30;
           bottom = null;
+          // 如果靠上边距离太小,则稍微下移
           top = menuPosition.dy <= 15 ? menuPosition.dy + 10 : 0;
           bottom = null;
         }
       }
     }
+    // 构建子菜单
     __buildSubmenu(menu, left, top, right, bottom, overlay);
     Overlay.of(context).insert(_popups[menu.key.toString()]!);
   }
@@ -330,7 +384,14 @@ class _RuiToolButtonState extends State<RuiToolButton> {
     _popups[menu.key.toString()] = OverlayEntry(
       builder: (_) {
         Widget buildItemWidget(RuiMenuItem item) {
+          item.parent = menu;
           Widget aMenuItem = MenuItemButton(
+            key: item.key,
+            onHover: (onHover) {
+              if (item.hasSubItems) {
+                _showSubMenuDelay(item);
+              }
+            },
             onPressed: () {
               if (item.hasSubItems) {
                 _showSubMenuDelay(item);
@@ -340,7 +401,8 @@ class _RuiToolButtonState extends State<RuiToolButton> {
             child: RuiMenuItemWidget(
               item: item,
               iconScale: 1,
-              menuIconSize: widget.iconSize,
+              menuIconSize: RuiToolButton.menuItemIconSize,
+              minWidth: RuiToolButton.menuItemMinWidth,
             ),
           );
 
@@ -348,7 +410,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         }
 
         final menuItemWidgets = menu.subItems!.map(buildItemWidget).toList();
-
+        // print("top=$top, left=$left,$right=right, $bottom=bottom");
         return Positioned(
           top: top,
           left: left,
@@ -358,15 +420,14 @@ class _RuiToolButtonState extends State<RuiToolButton> {
             child: Focus(
               focusNode: _focusNode,
               onFocusChange: (hasFocus) {
-                if (!hasFocus) {
-                  // _removeOverlay();
-                  _removeHoveredPopupKey(menu);
-                }
+                // if (!hasFocus) {
+                //   // _removeOverlay();
+                //   _removeHoveredPopupKey(menu);
+                // }
               },
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minWidth: min(overlay.size.width, RuiToolButton.itemMinWidth),
-                  maxWidth: overlay.size.width,
+                  minWidth: RuiToolButton.menuItemMinWidth,
                   maxHeight: overlay.size.height - (top ?? 0),
                 ),
                 child: PhysicalModel(
@@ -400,6 +461,10 @@ class _RuiToolButtonState extends State<RuiToolButton> {
     );
   }
 
+  /// 添加悬停菜单项的key到_hoveredPopupKey集合中
+  /// 同时也会添加其所有父级菜单项的key
+  /// [menu] 当前菜单项
+  /// [addSelf] 是否添加自身的key,默认为true
   void _addHoveredPopupKey(RuiMenuItem menu, {bool addSelf = true}) {
     if (addSelf) _hoveredPopupKey.add(menu.key.toString());
 

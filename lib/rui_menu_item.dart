@@ -8,6 +8,7 @@ class RuiMenuItem {
   final String id;
   final IconData icon;
   final String title;
+  final String? tooltip;
 
   bool active;
   bool? checked;
@@ -25,6 +26,7 @@ class RuiMenuItem {
     required this.id,
     required this.icon,
     required this.title,
+    this.tooltip,
     this.params,
     this.onPressed,
     this.subItems,

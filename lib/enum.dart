@@ -4,8 +4,7 @@ enum TriggerMode {
   hover,
 }
 
-enum MenuButtonStyle {
-  textOnly,
+enum MenuButtonStyle { 
   iconOnly,
   textUnderIcon,
   textFollowIcon,
