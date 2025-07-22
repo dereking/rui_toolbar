@@ -15,11 +15,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'RUI Demo',
+      title: 'RUI Toolbar Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
-      home: const MyHomePage(title: 'RUI Demo'),
+      home: const MyHomePage(title: 'RUI Toolbar Demo'),
     );
   }
 }
@@ -34,17 +34,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   bool inboxChecked = true;
 
   MenuButtonStyle buttonStyle = MenuButtonStyle.iconOnly;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [_leftMenu(context), Expanded(child: _buildBody(context))],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {},
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -68,6 +60,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return RuiToolbar(
       buttonStyle: buttonStyle,
       iconSize: 16,
+      onToolItemSelect: (item) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Selected menu item: ${item.id} - ${item.title}'),
+            // duration: const Duration(seconds: 2),
+          ),
+        );
+      },
       items: [
         RuiMenuItem(id: 'top-1', icon: Icons.home, title: 'Home'),
         RuiMenuItem(
@@ -103,11 +103,18 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             RuiMenuItem(id: 'top-2-2', icon: Icons.settings, title: 'Movie'),
-            RuiMenuItem(id: 'top-2-3', icon: Icons.inbox, checked: inboxChecked, title: 'Inbox', onPressed: (){
+            RuiMenuItem(
+              id: 'top-2-3',
+              icon: Icons.inbox,
+              checked: inboxChecked,
+              title: 'Inbox',
+              onPressed: (RuiMenuItem item) {
+                print("onPressed item $item");
                 setState(() {
-                  inboxChecked=!inboxChecked;
+                  // item.checked != item.checked;
                 });
-            }),
+              },
+            ),
           ],
         ),
       ],
@@ -117,12 +124,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildBody(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        _buildTopBar(context),
-        _buildMenuSetting(context),
-        const Text('You have pushed the button this many times:'),
-        Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
-      ],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[_buildTopBar(context), _buildMenuSetting(context)],
     );
   }
 
@@ -199,8 +202,16 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.settings,
               title: 'Sound',
               subItems: [
-                RuiMenuItem(id: 'left-2-1-1', icon: Icons.voice_chat, title: 'Tone'),
-                RuiMenuItem(id: 'left-2-1-2', icon: Icons.volume_down, title: 'Volume'),
+                RuiMenuItem(
+                  id: 'left-2-1-1',
+                  icon: Icons.voice_chat,
+                  title: 'Tone',
+                ),
+                RuiMenuItem(
+                  id: 'left-2-1-2',
+                  icon: Icons.volume_down,
+                  title: 'Volume',
+                ),
               ],
             ),
             RuiMenuItem(id: 'left-2-2', icon: Icons.settings, title: 'Movie'),
@@ -216,7 +227,11 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.location_city,
               title: 'Location',
             ),
-            RuiMenuItem(id: 'left-6-2', icon: Icons.telegram, title: 'Telegram'),
+            RuiMenuItem(
+              id: 'left-6-2',
+              icon: Icons.telegram,
+              title: 'Telegram',
+            ),
           ],
         ),
       ],

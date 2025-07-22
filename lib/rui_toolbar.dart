@@ -1,4 +1,4 @@
-import 'dart:math';
+ 
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -22,7 +22,11 @@ class RuiToolbar extends StatefulWidget {
   // 图标大小
   final double iconSize;
 
+  final void Function(RuiMenuItem item)? onToolItemSelect;
+
   static const padding = EdgeInsets.symmetric(horizontal: 12, vertical: 8);
+
+
 
     RuiToolbar({
     super.key,
@@ -36,6 +40,7 @@ class RuiToolbar extends StatefulWidget {
     this.buttonStyle = MenuButtonStyle.textFollowIcon,
     this.enableSelectedTopMenu = false,
     this.initialSelectedTopMenuIndex = 0,
+    this.onToolItemSelect,
   }) ;
 
   @override
@@ -47,23 +52,7 @@ class _RuiToolbarState extends State<RuiToolbar> {
   GlobalKey<State<StatefulWidget>>? _selectedMenuKey;
 
   @override
-  Widget build(BuildContext context) {
-    // return ScrollConfiguration(
-    //   behavior: ScrollConfiguration.of(context).copyWith(
-    //     dragDevices: {
-    //       PointerDeviceKind.touch,
-    //       PointerDeviceKind.mouse,
-    //       PointerDeviceKind.trackpad,
-    //     },
-    //     scrollbars: false,
-    //   ),
-    //   child: SingleChildScrollView(
-    //     scrollDirection: widget.vertical ? Axis.vertical : Axis.horizontal,
-    //     child: Ink(
-    //       color: Theme.of(context).colorScheme.primaryContainer,
-    //      child: _buildButtons(),) ,
-    //   ),
-    // );
+  Widget build(BuildContext context) { 
     return LayoutBuilder(
       builder: (ctx, size) {
         return SizedBox(
@@ -94,6 +83,7 @@ class _RuiToolbarState extends State<RuiToolbar> {
                     width: widget.vertical ? getWidth() : null,
                     triggerMode: widget.triggerMode,
                     buttonStyle: widget.buttonStyle,
+                    onToolItemSelect: _onToolItemSelect,
                   );
                 },
               ),
@@ -102,6 +92,10 @@ class _RuiToolbarState extends State<RuiToolbar> {
         );
       },
     );
+  }
+
+  void _onToolItemSelect(RuiMenuItem item){
+    widget.onToolItemSelect?.call(item) ;
   }
 
   double getWidth() {

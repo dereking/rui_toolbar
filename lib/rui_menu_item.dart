@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 typedef MenuEvent = void Function(RuiMenuItem item);
 
-class RuiMenuItem {
+class RuiMenuItem with ChangeNotifier {
   final GlobalKey _key;
 
   final String id;
@@ -10,8 +10,21 @@ class RuiMenuItem {
   final String title;
   final String? tooltip;
 
-  bool active;
-  bool? checked;
+  //是否活跃状态。
+  bool? _active;
+  bool? get active => _active;
+  set active(bool? a) {
+    _active = a;
+    notifyListeners();
+  }
+
+  // 是否选中
+  bool? _checked;
+  bool? get checked => _checked;
+  set checked(bool? b) {
+    _checked = b;
+    notifyListeners();
+  }
 
   final List<String>? params;
 
@@ -20,7 +33,7 @@ class RuiMenuItem {
 
   RuiMenuItem? parent;
 
-  final VoidCallback? onPressed;
+  final void Function(RuiMenuItem )? onPressed;
 
   RuiMenuItem({
     required this.id,
@@ -30,11 +43,12 @@ class RuiMenuItem {
     this.params,
     this.onPressed,
     this.subItems,
-    this.active = false,
-    this.checked ,
-  }) : _key = GlobalObjectKey(id);
-  // }) : _key = GlobalKey();
-
+    bool? active = false,
+    bool? checked = false,
+  }) : _key = GlobalObjectKey(id) {
+    active = active;
+    checked = checked;
+  } 
 
   GlobalKey get key => _key;
 
@@ -57,9 +71,7 @@ class RuiMenuItem {
   }
 
   void setParent() {
-    if (subItems==null || subItems!.isEmpty) return;
+    if (subItems == null || subItems!.isEmpty) return;
     subItems?.forEach((e) => e.parent = this);
   }
-
-  
 }

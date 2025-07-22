@@ -1,14 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'rui_menu_item.dart';
 
-class RuiMenuItemWidget extends StatelessWidget {
+class RuiMenuItemWidget extends StatefulWidget {
   final RuiMenuItem item;
-
   final double iconScale;
-
   final double menuIconSize;
   final double minWidth;
 
@@ -23,21 +22,27 @@ class RuiMenuItemWidget extends StatelessWidget {
   });
 
   @override
+  State<RuiMenuItemWidget> createState() => _RuiMenuItemWidgetState();
+}
+
+class _RuiMenuItemWidgetState extends State<RuiMenuItemWidget> {
+  @override
   Widget build(BuildContext context) {
-    if (item.tooltip != null) {
-      return Tooltip(message: item.tooltip, child: _buildMain());
+    // final item = Provider.of<RuiMenuItem>(context);
+    if (widget.item.tooltip != null) {
+      return Tooltip(message: widget.item.tooltip, child: _buildMain( widget.item));
     }
 
-    return _buildMain();
+    return _buildMain( widget.item);
   }
 
-  Widget _buildMain() {
+  Widget _buildMain(RuiMenuItem item) { 
     return SizedBox(
       width: max(
-        minWidth,
-        2 * menuIconSize +
+        widget.minWidth,
+        2 * widget.menuIconSize +
             item.title.length * 8 +
-            gutSize +
+            RuiMenuItemWidget.gutSize +
             (item.hasSubItems ? 32 : 0),
       ),
       child: Row(
@@ -49,8 +54,8 @@ class RuiMenuItemWidget extends StatelessWidget {
               (item.checked != null && item.checked!) ? "✓" : " ",
             ),
           ),
-          Icon(item.icon, size: menuIconSize),
-          Container(width: gutSize),
+          Icon(item.icon, size: widget.menuIconSize),
+          Container(width: RuiMenuItemWidget.gutSize),
           Text(item.title),
           if (item.hasSubItems) const Spacer(),
           if (item.hasSubItems) const Icon(Icons.chevron_right),
