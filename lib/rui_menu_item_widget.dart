@@ -43,7 +43,7 @@ class _RuiMenuItemWidgetState extends State<RuiMenuItemWidget> {
         2 * widget.menuIconSize +
             item.title.length * 8 +
             RuiMenuItemWidget.gutSize +
-            (item.hasSubItems ? 32 : 0),
+            (item.hasChildren ? 32 : 0),
       ),
       child: Row(
         // mainAxisSize: MainAxisSize.min,
@@ -57,8 +57,8 @@ class _RuiMenuItemWidgetState extends State<RuiMenuItemWidget> {
           Icon(item.icon, size: widget.menuIconSize),
           Container(width: RuiMenuItemWidget.gutSize),
           Text(item.title),
-          if (item.hasSubItems) const Spacer(),
-          if (item.hasSubItems) const Icon(Icons.chevron_right),
+          if (item.hasChildren) const Spacer(),
+          if (item.hasChildren) const Icon(Icons.chevron_right),
         ],
       ),
     );

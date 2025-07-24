@@ -28,12 +28,12 @@ class RuiMenuItem with ChangeNotifier {
 
   final List<String>? params;
 
-  final List<RuiMenuItem>? subItems;
-  bool get hasSubItems => subItems != null && subItems!.isNotEmpty;
+  final List<RuiMenuItem>? children;
+  bool get hasChildren => children != null && children!.isNotEmpty;
 
   RuiMenuItem? parent;
 
-  final void Function(RuiMenuItem )? onPressed;
+  final void Function(RuiMenuItem )? onTap;
 
   RuiMenuItem({
     required this.id,
@@ -41,8 +41,8 @@ class RuiMenuItem with ChangeNotifier {
     required this.title,
     this.tooltip,
     this.params,
-    this.onPressed,
-    this.subItems,
+    this.onTap,
+    this.children,
     bool? active = false,
     bool? checked = false,
   }) : _key = GlobalObjectKey(id) {
@@ -71,7 +71,7 @@ class RuiMenuItem with ChangeNotifier {
   }
 
   void setParent() {
-    if (subItems == null || subItems!.isEmpty) return;
-    subItems?.forEach((e) => e.parent = this);
+    if (children == null || children!.isEmpty) return;
+    children?.forEach((e) => e.parent = this);
   }
 }

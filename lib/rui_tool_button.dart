@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rui_toolbar/overlay_key_link_node.dart';
+import 'package:rui_toolbar/recursive_menu_controller.dart';
 
 import 'enum.dart';
 import 'rui_menu_item.dart';
@@ -55,18 +56,20 @@ class RuiToolButton extends StatefulWidget {
 }
 
 class _RuiToolButtonState extends State<RuiToolButton> {
+  static final RecursiveMenuController controller = RecursiveMenuController();
+
   bool _disposed = false;
 
   final FocusNode _focusNode = FocusNode();
 
-  final SplayTreeMap<String, OverlayEntry> _popups = SplayTreeMap();
-  final Set<String> _hoveredPopupKey = {};
+  // final SplayTreeMap<String, OverlayEntry> _popups = SplayTreeMap();
+  // final Set<String> _hoveredPopupKey = {};
 
   @override
   void dispose() {
     _disposed = true;
 
-    // 遍历链表删除所有节点的o 
+    // 遍历链表删除所有节点的o
     // OverlayKeyLinkNode? node =
     //     RuiToolButton._popupLink.first as OverlayKeyLinkNode;
     // while (node != null) {
@@ -75,9 +78,10 @@ class _RuiToolButtonState extends State<RuiToolButton> {
     // }
     // RuiToolButton._popupLink.clear();
 
-    _hoveredPopupKey.clear();
-    _popups.forEach((k, v) => v.remove());
-    _popups.clear();
+    // _hoveredPopupKey.clear();
+
+    // _popups.forEach((k, v) => v.remove());
+    // _popups.clear();
 
     _focusNode.dispose();
     super.dispose();
@@ -132,9 +136,9 @@ class _RuiToolButtonState extends State<RuiToolButton> {
       // crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildButtonContent(item, false),
-        if (item.hasSubItems && widget.buttonStyle != MenuButtonStyle.iconOnly)
+        if (item.hasChildren && widget.buttonStyle != MenuButtonStyle.iconOnly)
           if (widget.toolbarVertical) Container(),
-        if (item.hasSubItems && widget.buttonStyle != MenuButtonStyle.iconOnly)
+        if (item.hasChildren && widget.buttonStyle != MenuButtonStyle.iconOnly)
           __buildDropdownArrow(() {
             showSubMenu(item);
           }),
@@ -149,7 +153,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         alignment: AlignmentDirectional.center,
         children: [
           _buildButtonContent(item, true),
-          if (item.hasSubItems &&
+          if (item.hasChildren &&
               widget.buttonStyle != MenuButtonStyle.iconOnly)
             __buildDropdownArrow(() {
               showSubMenu(item);
@@ -253,7 +257,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
   void _onTap(RuiMenuItem item) {
     widget.onToolItemSelect?.call(item);
 
-    item.onPressed?.call(item);
+    item.onTap?.call(item);
   }
 
   void _showSubMenuDelay(RuiMenuItem parent) {
@@ -263,7 +267,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
   }
 
   void showSubMenu(RuiMenuItem parent) {
-    if (parent.subItems == null || parent.subItems!.isEmpty) {
+    if (parent.children == null || parent.children!.isEmpty) {
       return;
     }
     if (_disposed) return;
@@ -282,9 +286,11 @@ class _RuiToolButtonState extends State<RuiToolButton> {
 
   void _showHoveredPopupMenu(RuiMenuItem parent, BuildContext context) {
     if (_disposed) return;
-    if (_popups.containsKey(parent.key.toString())) return;
+    // if (_popups.containsKey(parent.key.toString())) return;
 
-    if (parent.subItems == null || parent.subItems!.isEmpty) return;
+    if (parent.children == null || parent.children!.isEmpty) return;
+
+    // _removeEntriesFromLevel(_entries.length);
 
     // 获取覆盖层的RenderBox对象,用于计算菜单位置
     final RenderBox overlay =
@@ -343,7 +349,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
 
     // 处理垂直方向溢出
     // 如果菜单底部超出屏幕
-    if (position.dy + 24 * parent.subItems!.length > overlay.size.height) {
+    if (position.dy + 24 * parent.children!.length > overlay.size.height) {
       if (rootMenu) {
         // 根菜单靠底对齐
         top = null;
@@ -362,6 +368,8 @@ class _RuiToolButtonState extends State<RuiToolButton> {
         }
       }
     }
+ 
+
     // 构建子菜单
     final OverlayEntry? oe = __buildSubmenuOverlayEntry(
       parent,
@@ -371,7 +379,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
       bottom,
       overlay,
     );
- 
+
     if (oe != null) {
       //记录当前级别的key到链表。
       // updateOverlayLink(parent, oe);
@@ -425,7 +433,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
     double? bottom,
     RenderBox overlay,
   ) {
-    if (parent.subItems == null || parent.subItems!.isEmpty) {
+    if (parent.children == null || parent.children!.isEmpty) {
       return null;
     }
 
@@ -437,7 +445,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
           Widget aMenuItem = MenuItemButton(
             key: subItem.key,
             onHover: (onHover) {
-              if (subItem.hasSubItems) {
+              if (subItem.hasChildren) {
                 // 显示subItem的子菜单
                 _showSubMenuDelay(subItem);
               }
@@ -447,10 +455,10 @@ class _RuiToolButtonState extends State<RuiToolButton> {
               widget.onToolItemSelect?.call(subItem);
 
               //trigger item event
-              subItem.onPressed?.call(subItem);
+              subItem.onTap?.call(subItem);
 
               //show submenu
-              if (subItem.hasSubItems) {
+              if (subItem.hasChildren) {
                 // 显示subItem的子菜单
                 _showSubMenuDelay(subItem);
               }
@@ -466,9 +474,9 @@ class _RuiToolButtonState extends State<RuiToolButton> {
           return aMenuItem;
         }
 
-        final menuItemWidgets = parent.subItems!.map(buildItemWidget).toList();
-        
-        // for (var sub in parent.subItems!) {
+        final menuItemWidgets = parent.children!.map(buildItemWidget).toList();
+
+        // for (var sub in parent.children!) {
         //   print("sub = ${sub.id} ${sub.title}");
         // }
         // for (var w in menuItemWidgets) {
@@ -495,14 +503,14 @@ class _RuiToolButtonState extends State<RuiToolButton> {
                   child: MouseRegion(
                     onHover: (PointerHoverEvent e) {
                       //TODO:
-                      _addHoveredPopupKey(parent);
+                      // _addHoveredPopupKey(parent);
 
                       // 显示子菜单
                       _showSubMenuDelay(parent);
                     },
                     onExit: (PointerExitEvent w) {
                       //TODO:
-                      _removeHoveredPopupKey(parent);
+                      // _removeHoveredPopupKey(parent);
                     },
                     child: IntrinsicWidth(
                       child: SingleChildScrollView(
@@ -521,7 +529,7 @@ class _RuiToolButtonState extends State<RuiToolButton> {
       },
     );
 
-    _popups[parent.key.toString()] = ret;
+    // _popups[parent.key.toString()] = ret;
 
     return ret;
   }
@@ -530,64 +538,64 @@ class _RuiToolButtonState extends State<RuiToolButton> {
   /// 同时也会添加其所有父级菜单项的key
   /// [menu] 当前菜单项
   /// [addSelf] 是否添加自身的key,默认为true
-  void _addHoveredPopupKey(RuiMenuItem menu, {bool addSelf = true}) {
-    if (addSelf) _hoveredPopupKey.add(menu.key.toString());
+  // void _addHoveredPopupKey(RuiMenuItem menu, {bool addSelf = true}) {
+  //   if (addSelf) _hoveredPopupKey.add(menu.key.toString());
 
-    var current = menu.parent;
-    while (current != null) {
-      _hoveredPopupKey.add(current.key.toString());
-      current = current.parent;
-    }
-  }
+  //   var current = menu.parent;
+  //   while (current != null) {
+  //     _hoveredPopupKey.add(current.key.toString());
+  //     current = current.parent;
+  //   }
+  // }
 
   // 移除
-  void _removeHoveredPopupKey(RuiMenuItem menu) {
-    _hoveredPopupKey.clear();
+  // void _removeHoveredPopupKey(RuiMenuItem menu) {
+  //   _hoveredPopupKey.clear();
 
-    Future.delayed(const Duration(milliseconds: 60), () {
-      // 如果当前菜单项不在悬停状态,移除其对应的弹出菜单
-      if (!_hoveredPopupKey.contains(menu.key.toString())) {
-        _popups[menu.key.toString()]?.remove();
-        _popups.remove(menu.key.toString());
-      }
+  //   Future.delayed(const Duration(milliseconds: 60), () {
+  //     // 如果当前菜单项不在悬停状态,移除其对应的弹出菜单
+  //     if (!_hoveredPopupKey.contains(menu.key.toString())) {
+  //       _popups[menu.key.toString()]?.remove();
+  //       _popups.remove(menu.key.toString());
+  //     }
 
-      // 如果没有任何菜单项处于悬停状态,清除所有弹出菜单
-      if (_hoveredPopupKey.isEmpty) {
-        _popups.forEach((k, v) => v.remove());
-        _popups.clear();
-      }
-    });
+  //     // 如果没有任何菜单项处于悬停状态,清除所有弹出菜单
+  //     if (_hoveredPopupKey.isEmpty) {
+  //       _popups.forEach((k, v) => v.remove());
+  //       _popups.clear();
+  //     }
+  //   });
 
-    // // 从当前menu开始向上遍历parent，构建祖先key列表
-    // List<String> ancestorKeys = [];
-    // RuiMenuItem? current = menu;
-    // while (current != null) {
-    //   ancestorKeys.insert(0, current.key.toString());
-    //   current = current.parent;
-    // }
+  // // 从当前menu开始向上遍历parent，构建祖先key列表
+  // List<String> ancestorKeys = [];
+  // RuiMenuItem? current = menu;
+  // while (current != null) {
+  //   ancestorKeys.insert(0, current.key.toString());
+  //   current = current.parent;
+  // }
 
-    // // 遍历链表，检查现有节点是否与ancestorKeys一一对应
-    // var node = RuiToolButton._popupLink.first as OverlayKeyLinkNode?;
-    // int matchCount = 0;
+  // // 遍历链表，检查现有节点是否与ancestorKeys一一对应
+  // var node = RuiToolButton._popupLink.first as OverlayKeyLinkNode?;
+  // int matchCount = 0;
 
-    // while (node != null && matchCount < ancestorKeys.length) {
-    //   if (node.key != ancestorKeys[matchCount]) {
-    //     break;
-    //   }
-    //   matchCount++;
-    //   node = node.next  ;
-    // }
+  // while (node != null && matchCount < ancestorKeys.length) {
+  //   if (node.key != ancestorKeys[matchCount]) {
+  //     break;
+  //   }
+  //   matchCount++;
+  //   node = node.next  ;
+  // }
 
-    // // 移除不匹配的后续节点
-    // while (RuiToolButton._popupLink.length > matchCount) {
-    //   var a= RuiToolButton._popupLink.last as OverlayKeyLinkNode?;
+  // // 移除不匹配的后续节点
+  // while (RuiToolButton._popupLink.length > matchCount) {
+  //   var a= RuiToolButton._popupLink.last as OverlayKeyLinkNode?;
 
-    //   a?.overlay.remove();
+  //   a?.overlay.remove();
 
-    //   RuiToolButton._popupLink.remove(a!);
-    // }
- 
-  }
+  //   RuiToolButton._popupLink.remove(a!);
+  // }
+
+  //   }
 }
 
 class ClipperRect extends CustomClipper<Rect> {

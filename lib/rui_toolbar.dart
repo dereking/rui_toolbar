@@ -25,10 +25,9 @@ class RuiToolbar extends StatefulWidget {
   final void Function(RuiMenuItem item)? onToolItemSelect;
 
   static const padding = EdgeInsets.symmetric(horizontal: 12, vertical: 8);
+ 
 
-
-
-    RuiToolbar({
+   const RuiToolbar({
     super.key,
     // required this.id,
     required this.items,

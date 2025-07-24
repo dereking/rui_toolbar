@@ -74,12 +74,12 @@ class _MyHomePageState extends State<MyHomePage> {
           id: 'top-2',
           icon: Icons.settings,
           title: 'All Settings',
-          subItems: [
+          children: [
             RuiMenuItem(
               id: 'top-2-1',
               icon: Icons.settings,
               title: 'Sound of Setting',
-              subItems: [
+              children: [
                 RuiMenuItem(
                   id: 'top-2-1-1',
                   icon: Icons.settings,
@@ -108,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.inbox,
               checked: inboxChecked,
               title: 'Inbox',
-              onPressed: (RuiMenuItem item) {
+              onTap: (RuiMenuItem item) {
                 print("onPressed item $item");
                 setState(() {
                   // item.checked != item.checked;
@@ -196,12 +196,12 @@ class _MyHomePageState extends State<MyHomePage> {
           id: 'left-2',
           icon: Icons.settings,
           title: 'All Media Settings',
-          subItems: [
+          children: [
             RuiMenuItem(
               id: 'left-2-1',
               icon: Icons.settings,
               title: 'Sound',
-              subItems: [
+              children: [
                 RuiMenuItem(
                   id: 'left-2-1-1',
                   icon: Icons.voice_chat,
@@ -221,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
           id: 'left-6',
           icon: Icons.info,
           title: 'About',
-          subItems: [
+          children: [
             RuiMenuItem(
               id: 'left-6-1',
               icon: Icons.location_city,
