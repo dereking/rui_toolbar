@@ -27,16 +27,23 @@ class RuiMenuItemWidget extends StatefulWidget {
 
 class _RuiMenuItemWidgetState extends State<RuiMenuItemWidget> {
   @override
-  Widget build(BuildContext context) {
-    // final item = Provider.of<RuiMenuItem>(context);
-    if (widget.item.tooltip != null) {
-      return Tooltip(message: widget.item.tooltip, child: _buildMain( widget.item));
-    }
-
-    return _buildMain( widget.item);
+  Widget build(BuildContext context) { 
+    return ChangeNotifierProvider<RuiMenuItem>.value(
+      value: widget.item,
+      child: Consumer<RuiMenuItem>(
+        builder: (BuildContext context, RuiMenuItem root, Widget? child) {
+          return (root.tooltip != null)
+              ? Tooltip(
+                message: root.tooltip,
+                child: _buildMain(root),
+              )
+              : _buildMain(root);
+        },
+      ),
+    );
   }
 
-  Widget _buildMain(RuiMenuItem item) { 
+  Widget _buildMain(RuiMenuItem item) {
     return SizedBox(
       width: max(
         widget.minWidth,
@@ -50,9 +57,7 @@ class _RuiMenuItemWidgetState extends State<RuiMenuItemWidget> {
         children: [
           SizedBox(
             width: 16,
-            child: Text(
-              (item.checked != null && item.checked!) ? "✓" : " ",
-            ),
+            child: Text((item.checked != null && item.checked!) ? "✓" : " "),
           ),
           Icon(item.icon, size: widget.menuIconSize),
           Container(width: RuiMenuItemWidget.gutSize),

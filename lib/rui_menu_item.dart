@@ -31,9 +31,21 @@ class RuiMenuItem with ChangeNotifier {
   final List<RuiMenuItem>? children;
   bool get hasChildren => children != null && children!.isNotEmpty;
 
-  RuiMenuItem? parent;
+  int _level = 0;
+  int get level => _level;
 
-  final void Function(RuiMenuItem )? onTap;
+  RuiMenuItem? _parent;
+  RuiMenuItem? get parent => _parent;
+  set parent(RuiMenuItem? p) {
+    // if (children == null || children!.isEmpty) return;
+    // children?.forEach((e) => e.parent = this);
+    _parent = p;
+    if (p != null) {
+      _level = p.level + 1;
+    }
+  }
+
+  final void Function(RuiMenuItem)? onTap;
 
   RuiMenuItem({
     required this.id,
@@ -48,7 +60,7 @@ class RuiMenuItem with ChangeNotifier {
   }) : _key = GlobalObjectKey(id) {
     active = active;
     checked = checked;
-  } 
+  }
 
   GlobalKey get key => _key;
 
@@ -68,10 +80,5 @@ class RuiMenuItem with ChangeNotifier {
     RenderBox box = _key.currentContext!.findRenderObject() as RenderBox;
 
     return box.size;
-  }
-
-  void setParent() {
-    if (children == null || children!.isEmpty) return;
-    children?.forEach((e) => e.parent = this);
   }
 }

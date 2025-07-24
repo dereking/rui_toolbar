@@ -102,9 +102,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            RuiMenuItem(id: 'top-2-2', icon: Icons.settings, title: 'Movie'),
+            RuiMenuItem(id: 'top-2', icon: Icons.settings, title: 'Movie'),
             RuiMenuItem(
-              id: 'top-2-3',
+              id: 'top-3',
               icon: Icons.inbox,
               checked: inboxChecked,
               title: 'Inbox',
@@ -189,9 +189,6 @@ class _MyHomePageState extends State<MyHomePage> {
       buttonStyle: buttonStyle,
       items: [
         RuiMenuItem(id: 'left-1', icon: Icons.home, title: 'Home'),
-        RuiMenuItem(id: 'left-3', icon: Icons.movie, title: 'Movie'),
-        RuiMenuItem(id: 'left-4', icon: Icons.music_video, title: 'Music'),
-        RuiMenuItem(id: 'left-5', icon: Icons.games, title: 'Game'),
         RuiMenuItem(
           id: 'left-2',
           icon: Icons.settings,
@@ -218,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         RuiMenuItem(
-          id: 'left-6',
+          id: 'left-3',
           icon: Icons.info,
           title: 'About',
           children: [
@@ -234,6 +231,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
+
+        RuiMenuItem(id: 'left-4', icon: Icons.music_video, title: 'Music'),
+        RuiMenuItem(id: 'left-5', icon: Icons.games, title: 'Game'),
+        RuiMenuItem(id: 'left-6', icon: Icons.movie, title: 'Movie'),
       ],
     );
   }
