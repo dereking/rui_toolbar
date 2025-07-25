@@ -29,7 +29,7 @@ class RuiToolMenuController {
   }
 
   Future<void> showSubMenu(BuildContext context, RuiMenuItem item) async {
-    if (_currentKey == item.key.toString() || item.children==null) {
+    if (_currentKey == item.key.toString() || item.children == null) {
       return;
     }
 
@@ -38,8 +38,8 @@ class RuiToolMenuController {
     RuiToolMenuOverlay? oe =
         _popups[item.key.toString()] as RuiToolMenuOverlay?;
     if (oe == null) {
-      oe = RuiToolMenuOverlay(item);
-      oe.init(context);
+      oe = RuiToolMenuOverlay(context, item);
+      oe.init();
 
       _popups[item.key.toString()] = oe;
     }
@@ -82,7 +82,9 @@ class RuiToolMenuController {
 
 class RuiToolMenuOverlay {
   final RuiMenuItem item;
-  RuiToolMenuOverlay(this.item);
+
+  BuildContext context;
+  RuiToolMenuOverlay(this.context, this.item);
 
   double? left;
   double? top;
@@ -98,16 +100,19 @@ class RuiToolMenuOverlay {
 
   OverlayEntry? overlay;
 
-  void init(BuildContext context) {
-    overlay = _newOverlay(context, item);
+  void init() {
+    overlay = _newOverlay(item);
   }
 
-  void _calSize(BuildContext context, RuiMenuItem item) {
+  void _calSize(RuiMenuItem item) {
     if (item.key.currentState == null) {
       print("error item.key.currentState is null");
       return;
     }
     if (item.children == null) return;
+
+    // 获取菜单项的RenderBox对象
+    // final RenderBox itemRenderBox = item.key.currentContext!.findRenderObject() as RenderBox; 
 
     // 获取覆盖层的RenderBox对象,用于计算菜单位置
     final RenderBox box =
@@ -127,10 +132,9 @@ class RuiToolMenuOverlay {
     // 计算位置偏移量
     // 根菜单: 向右偏移5,向下偏移菜单高度
     // 子菜单:
-    final Offset positionOffset =
-        rootMenu
-            ? Offset(5, menuSize.height)
-            : Offset(menuSize.width * 2 / 3, menuSize.height * 2 / 3);
+    final Offset positionOffset = rootMenu
+        ? Offset(5, menuSize.height)
+        : Offset(menuSize.width * 2 / 3, menuSize.height * 2 / 3);
     // print(" cal offset rootMenu=$rootMenu, positionOffset=$positionOffset");
 
     // 计算最终的菜单显示位置
@@ -187,15 +191,14 @@ class RuiToolMenuOverlay {
     maxHeight = box.size.height - (top ?? 0);
   }
 
-  OverlayEntry? _newOverlay(BuildContext context, RuiMenuItem item) {
-
-    if (item.children==null){
+  OverlayEntry? _newOverlay(RuiMenuItem item) {
+    if (item.children == null) {
       return null;
     }
-    _calSize(context, item);
+    _calSize(item);
 
     return OverlayEntry(
-      builder: (context) {
+      builder: (_) {
         return Positioned(
           top: top,
           left: left,
@@ -212,7 +215,7 @@ class RuiToolMenuOverlay {
                 elevation: 1.0,
                 child: MouseRegion(
                   onHover: (PointerHoverEvent e) {},
-                  child: _buildMenuList(context, item),
+                  child: _buildMenuList(item),
                 ),
               ),
             ),
@@ -222,49 +225,48 @@ class RuiToolMenuOverlay {
     );
   }
 
-  Widget _buildMenuList(BuildContext context, RuiMenuItem parent) {
+  Widget _buildMenuList(RuiMenuItem parent) {
     if (parent.children == null) {
       return Text("empty menu items");
     }
 
-    final menuItemWidgets =
-        parent.children!.map((subItem) {
-          // print(" buildItemWidget subItem=${subItem.title}");
-          subItem.parent = parent;
-          Widget aMenuItem = MenuItemButton(
-            onHover: (onHover) {
-              if (subItem.hasChildren) {
-                // 显示subItem的子菜单
-                // _showSubMenuDelay(subItem);
-                RuiToolMenuController().showSubMenu(context, subItem);
-              } else {
-                //取消所有popup，除非是当前的menu弹出的
-                // updateOverlayLinks(parent, null);
-                RuiToolMenuController().hideToLevel(subItem.level);
-              }
-            },
-            onPressed: () {
-              RuiToolMenuController().hideAll();
+    final menuItemWidgets = parent.children!.map((subItem) {
+      // print(" buildItemWidget subItem=${subItem.title}");
+      subItem.parent = parent;
+      Widget aMenuItem = MenuItemButton(
+        onHover: (onHover) {
+          if (subItem.hasChildren) {
+            // 显示subItem的子菜单
+            // _showSubMenuDelay(subItem);
+            RuiToolMenuController().showSubMenu(context, subItem);
+          } else {
+            //取消所有popup，除非是当前的menu弹出的
+            // updateOverlayLinks(parent, null);
+            RuiToolMenuController().hideToLevel(subItem.level);
+          }
+        },
+        onPressed: () {
+          RuiToolMenuController().hideAll();
 
-              //trigger item event
-              subItem.onTap?.call(subItem);
+          //trigger item event
+          subItem.onTap?.call(subItem);
 
-              //show submenu
-              if (subItem.hasChildren) {
-                // 显示subItem的子菜单
-                RuiToolMenuController().showSubMenu(context, subItem);
-              }
-            },
-            child: RuiMenuItemWidget(
-              item: subItem,
-              iconScale: 1,
-              menuIconSize: menuItemIconSize,
-              minWidth: menuItemMinWidth,
-            ),
-          );
+          //show submenu
+          if (subItem.hasChildren) {
+            // 显示subItem的子菜单
+            RuiToolMenuController().showSubMenu(context, subItem);
+          }
+        },
+        child: RuiMenuItemWidget(
+          item: subItem,
+          iconScale: 1,
+          menuIconSize: menuItemIconSize,
+          minWidth: menuItemMinWidth,
+        ),
+      );
 
-          return aMenuItem;
-        }).toList();
+      return aMenuItem;
+    }).toList();
     return IntrinsicWidth(
       child: SingleChildScrollView(
         child: Column(
